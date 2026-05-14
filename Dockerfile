@@ -3,7 +3,7 @@ FROM alpine:3.19 AS builder
 
 RUN apk add --no-cache python3 py3-pip build-base
 
-RUN pip3 install --no-cache-dir beautifulsoup4
+RUN pip3 install --no-cache-dir --break-system-packages beautifulsoup4
 
 # Stage 2: n8n runtime — copy Python and site-packages from the builder stage
 FROM n8nio/n8n:latest
