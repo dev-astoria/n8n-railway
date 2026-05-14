@@ -10,14 +10,21 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Copy Python binaries (python3, pip3, etc.) from the Alpine builder
+# Copy Python binary from /usr/bin (Alpine places the python3 executable here)
+COPY --from=builder /usr/bin/python3* /usr/bin/
+
+# Copy pip3 and other Python-related scripts installed into /usr/local/bin
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy Python standard library and installed packages (e.g. beautifulsoup4)
 COPY --from=builder /usr/local/lib /usr/local/lib
 
-# Also copy the Alpine system-level Python libs so the interpreter resolves correctly
+# Copy Alpine system-level Python libs (stdlib, distutils, etc.)
 COPY --from=builder /usr/lib/python3* /usr/lib/
 
-# Ensure python3 resolves on PATH
-ENV PATH="/usr/local/bin:${PATH}"
+# Copy Alpine's /lib directory (musl libc, libssl, libcrypto, etc. that Python links against)
+COPY --from=builder /lib /lib
+
+# Ensure /usr/local/bin is on PATH and LD_LIBRARY_PATH points to the copied Alpine libs
+ENV PATH="/usr/local/bin:${PATH}" \
+    LD_LIBRARY_PATH="/lib:/usr/lib"
